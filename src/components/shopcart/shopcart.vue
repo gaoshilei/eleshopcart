@@ -22,11 +22,31 @@
         </div>
       </transition-group>
     </div>
+    <div class="shopcart-list" v-show="cartListShow">
+      <div class="list-header">
+        <h1 class="title">购物车</h1>
+        <h1 class="empty">清空</h1>
+      </div>
+      <div class="list-content">
+        <ul>
+          <li class="food" v-for="food in selectFoods">
+            <span class="name">{{food.name}}</span>
+            <div class="price">
+              <span>{{food.count * food.price}}</span>
+            </div>
+            <div class="cartcontrol-wrapper">
+              <cartcontrol :food="food"></cartcontrol>
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
+  import cartcontrol from '../../components/cartcontrol/cartcontrol.vue';
   export default {
     data () {
       return {
@@ -56,7 +76,8 @@
             id: 6
           }
         ],
-        dropBalls: []
+        dropBalls: [],
+        cartshow: false
       };
     },
     props: {
@@ -106,6 +127,13 @@
         } else {
           return 'enough';
         }
+      },
+      cartListShow () {
+        if (!this.totalPrice) {
+          return;
+        }
+        let isShow = !this.cartshow;
+        return isShow;
       }
     },
     methods: {
@@ -157,12 +185,16 @@
         }
         console.log('afterEnter');
       }
+    },
+    components: {
+      cartcontrol
     }
   };
 
 </script>
 
 <style lang="stylus" rel="stylesheet/stylus">
+  @import "../../common/stylus/mixin.styl";
   .shopcart
     position: fixed
     left: 0
@@ -263,4 +295,49 @@
             border-radius: 50%
             background: rgb(0, 160, 220)
             transition: all 0.4s linear
+    .shopcart-list
+      position: absolute
+      left: 0
+      top: 0
+      z-index: -1
+      width: 100%
+      .list-header
+        height: 40px
+        line-height: 40px
+        padding: 0 18px
+        background: #f3f5f7
+        border-bottom: 1px solid rgba(7, 17, 27, 0.1)
+        .title
+          float: left
+          font-size: 14px
+          font-weight: 200
+          color: rgb(7, 17, 27)
+        .empty
+          float: right
+          font-size: 12px
+          color: rgb(0, 160, 220)
+
+      .list-content
+        padding: 0 18px
+        max-height: 217px
+        overflow: hidden
+        background: #fff
+        .food
+          position: relative
+          padding: 12px 0
+          box-sizing: border-box
+          border-1px(rgba(7, 17, 27, 0.1))
+          .name
+            line-height: 24px
+            font-size: 14px
+            color: rgb(7, 17, 27)
+          .price
+            position: absolute
+            right: 90px
+            bottom: 12px
+            line-height: 24px
+            font-size: 14px
+            color: rgb(240, 20, 20)
+            
+
 </style>
