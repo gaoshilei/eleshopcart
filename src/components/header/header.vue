@@ -207,11 +207,10 @@
       transition: all .5s ease
     .slide-fade-leave-active
       transition: all .3s cubic-bezier(1.0, 0.5, 0.8, 1.0)
+      transform: translateY(100%)
     .slide-fade-enter
       transform: translateX(-100%)
       opacity: 0
-    .slide-fade-leave-active
-      transform: translateY(100%)
     .background
       position: absolute
       top: 0

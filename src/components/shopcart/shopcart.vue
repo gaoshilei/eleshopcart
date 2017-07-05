@@ -1,6 +1,6 @@
 <template>
   <div class="shopcart">
-    <div class="content">
+    <div class="content" @click="toggleList">
       <div class="content-left">
         <div class="logo-wrapper">
           <div class="logo" :class="{ 'hightlight': totalCount>0}">
@@ -12,7 +12,7 @@
         <div class="desc">另需配送费￥{{ deliveryPrice }}元</div>
       </div>
       <div class="content-right">
-        <div class="pay" :class="payClass">{{ payDesc }}</div>
+        <div class="pay" :class="payClass" @click.stop.prevent="goPay">{{ payDesc }}</div>
       </div>
     </div>
     <div class="ball-container">
@@ -22,31 +22,38 @@
         </div>
       </transition-group>
     </div>
-    <div class="shopcart-list" v-show="cartListShow">
-      <div class="list-header">
-        <h1 class="title">购物车</h1>
-        <h1 class="empty">清空</h1>
+    <transition name="fold">
+      <div class="shopcart-list" v-show="cartListShow">
+        <div class="list-header">
+          <h1 class="title">购物车</h1>
+          <h1 class="empty" @click="cartEmpty">清空</h1>
+        </div>
+        <div class="list-content" ref="listcontent">
+          <ul>
+            <li class="food" v-for="food in selectFoods">
+              <span class="name">{{food.name}}</span>
+              <div class="price">
+                <span>￥{{food.count * food.price}}</span>
+              </div>
+              <div class="cartcontrol-wrapper">
+                <cartcontrol :food="food"></cartcontrol>
+              </div>
+            </li>
+          </ul>
+        </div>
       </div>
-      <div class="list-content">
-        <ul>
-          <li class="food" v-for="food in selectFoods">
-            <span class="name">{{food.name}}</span>
-            <div class="price">
-              <span>{{food.count * food.price}}</span>
-            </div>
-            <div class="cartcontrol-wrapper">
-              <cartcontrol :food="food"></cartcontrol>
-            </div>
-          </li>
-        </ul>
-      </div>
-    </div>
+    </transition>
+    <transition name="fade">
+      <div class="list-mask" @click="toggleList" v-show="cartListShow"></div>
+    </transition>
   </div>
 </template>
 
 <script type="text/ecmascript-6">
   import Vue from 'vue';
   import cartcontrol from '../../components/cartcontrol/cartcontrol.vue';
+  import BScroll from 'better-scroll';
+
   export default {
     data () {
       return {
@@ -130,9 +137,21 @@
       },
       cartListShow () {
         if (!this.totalPrice) {
-          return;
+          this.cartshow = false;
+          return false;
         }
-        let isShow = !this.cartshow;
+        let isShow = this.cartshow;
+        if (isShow) {
+          this.$nextTick(() => {
+            if (!this.listScroll) {
+              this.listScroll = new BScroll(this.$refs.listcontent, {
+                click: true
+              });
+            } else {
+              this.listScroll.refresh();
+            }
+          });
+        }
         return isShow;
       }
     },
@@ -162,7 +181,6 @@
             let inner = el.getElementsByClassName('inner-hook')[0];
             inner.style.webkitTransform = `translate3d(${x}px,0,0)`;
             inner.style.transform = `translate3d(${x}px,0,0)`;
-            console.log('beforeEnter');
           }
         }
       },
@@ -175,7 +193,6 @@
         inner.style.webkitTransform = 'translate3d(0,0,0)';
         inner.style.transform = 'translate3d(0,0,0)';
         done();
-        console.log('enter');
       },
       afterEnter (el) {
         let ball = this.dropBalls.shift();
@@ -183,7 +200,24 @@
           ball.show = false;
           el.style.dispaly = 'none';
         }
-        console.log('afterEnter');
+      },
+      toggleList () {
+        if (!this.totalPrice) {
+          this.cartshow = false;
+          return;
+        }
+        this.cartshow = !this.cartshow;
+      },
+      cartEmpty () {
+        this.selectFoods.forEach((food) => {
+          food.count = 0;
+        });
+      },
+      goPay () {
+        if (this.totalPrice < this.minPrice) {
+          return;
+        }
+        alert(`支付${this.totalPrice}元`);
       }
     },
     components: {
@@ -301,6 +335,11 @@
       top: 0
       z-index: -1
       width: 100%
+      transform: translate3d(0, -100%, 0)
+      &.fold-enter-active, &.fold-leave-active
+        transition: all 0.5s
+      &.fold-enter, &.fold-leave-active
+        transform: translate3d(0, 0, 0)
       .list-header
         height: 40px
         line-height: 40px
@@ -316,7 +355,6 @@
           float: right
           font-size: 12px
           color: rgb(0, 160, 220)
-
       .list-content
         padding: 0 18px
         max-height: 217px
@@ -338,6 +376,24 @@
             line-height: 24px
             font-size: 14px
             color: rgb(240, 20, 20)
-            
+          .cartcontrol-wrapper
+            position: absolute
+            right: 0
+            bottom: 6px
 
+  .list-mask
+    position: fixed
+    top: 0
+    left: 0
+    width: 100%
+    height: 100%
+    z-index: -10
+    backdrop-filter: blur(10px)
+    opacity: 1
+    background: rgba(7, 17, 27, 0.6)
+    &.fade-enter-active, &.fade-leave-active //遮罩动画
+      transition: all 0.5s
+    &.fade-enter, &.fade-leave-active
+      opacity: 0
+      background: rgba(7, 17, 27, 0)
 </style>
