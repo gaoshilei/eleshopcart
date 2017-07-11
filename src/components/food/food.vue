@@ -19,7 +19,6 @@
               <span class="currentPrice">￥{{ food.price }}</span>
               <span v-show="food.oldPrice" class="oldPrice">￥{{ food.oldPrice }}</span>
             </div>
-
           </div>
         </div>
       </div>
@@ -108,7 +107,7 @@
         font-weight: 700
         line-height: 24px
         .currentPrice
-          margin: 0 8px 18px 0
+          margin-right: 8px
           font-size: 14px
           color: rgb(240, 20, 20)
         .oldPrice
