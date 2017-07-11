@@ -107,7 +107,6 @@
         font-weight: 700
         line-height: 24px
         .currentPrice
-          margin-right: 8px
           font-size: 14px
           color: rgb(240, 20, 20)
         .oldPrice
