@@ -1,7 +1,7 @@
 <template>
   <div class="foodWrapper">
     <transition name="move">
-      <div class="food" v-show="showDetail">
+      <div class="food" v-show="showDetail" ref="foodDetail">
         <div class="foodContent">
           <div class="header">
             <img :src="food.image"/>
@@ -19,7 +19,17 @@
               <span class="currentPrice">￥{{ food.price }}</span>
               <span v-show="food.oldPrice" class="oldPrice">￥{{ food.oldPrice }}</span>
             </div>
+            <div class="shopcartWrapper">
+              <cartcontrol :food="food" v-show="food.count>0"></cartcontrol>
+            </div>
+            <div @click="addFirst" class="buy" v-show="!food.count || food.count===0">加入购物车</div>
           </div>
+          <split v-show="food.info"></split>
+          <div class="infoWrapper" v-show="food.info">
+            <h1 class="title">{{ food.name }}</h1>
+            <p class="info">{{ food.info }}</p>
+          </div>
+          <split></split>
         </div>
       </div>
     </transition>
@@ -27,6 +37,10 @@
 </template>
 
 <script type="text/ecmascript-6">
+  import Vue from 'vue';
+  import BScroll from 'better-scroll';
+  import cartcontrol from '../../components/cartcontrol/cartcontrol.vue';
+  import split from '../../components/split/split.vue';
 
   export default {
     data () {
@@ -42,10 +56,26 @@
     methods: {
       show () {
         this.showDetail = true;
+        this.$nextTick(() => {
+          if (!this.scroll) {
+            this.scroll = new BScroll(this.$refs.foodDetail, {
+              click: true
+            });
+          } else {
+            this.scroll.refresh();
+          }
+        });
       },
       hide () {
         this.showDetail = false;
+      },
+      addFirst () {
+        Vue.set(this.food, 'count', 1);
       }
+    },
+    components: {
+      cartcontrol,
+      split
     }
   };
 
@@ -86,6 +116,7 @@
           font-size: 20px
           color: #fff
     .content
+      position: relative
       padding: 18px
       .title
         line-height: 14px
@@ -113,5 +144,32 @@
           text-decoration: line-through
           font-size: 10px
           color: rgb(147, 153, 159)
-
+      .shopcartWrapper, .buy
+        position: absolute
+        right: 18px
+      .shopcartWrapper
+        bottom: 12px
+      .buy
+        height: 24px
+        bottom: 18px
+        padding: 0 12px
+        line-height: 24px
+        font-size: 10px
+        box-sizing: border-box
+        border-radius: 12px
+        color: #fff
+        background: rgb(0, 160, 220)
+    .infoWrapper
+      padding: 18px
+      .title
+        margin-bottom: 6px
+        line-height: 14px
+        font-size: 14px
+        color: rgb(7, 17, 27)
+      .info
+        padding: 0 8px
+        line-height: 24px
+        font-size: 12px
+        font-weight: 200
+        color: rgb(77, 85, 93)
 </style>
